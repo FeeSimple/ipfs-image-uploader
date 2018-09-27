@@ -84,9 +84,24 @@ class App extends Component {
         console.error(error)
         return
       }
-      this.simpleStorageInstance.set(result[0].hash, { from: this.state.account }).then((r) => {
-        return this.setState({ ipfsHash: result[0].hash })
-        console.log('ifpsHash', this.state.ipfsHash)
+      console.log('ipfs.files.add - res: ', result);
+      // this.simpleStorageInstance.set(result[0].hash, { from: this.state.account }).then((r) => {
+      //   return this.setState({ ipfsHash: result[0].hash })
+      //   console.log('ifpsHash', this.state.ipfsHash)
+      // })
+
+      this.setState({ ipfsHash: result[0].hash })
+
+      ipfs.files.cat(result[0].hash, (error, res) => {
+        if(error) {
+          console.error(error)
+          return
+        }
+        
+        // Convert the image buffer to base64-encoded string so that it can be displayed with HTML "img" tag
+        this.setState({ buffer: "data:image/png;base64," + Buffer(res).toString('base64') })
+
+        console.log('ipfs.files.cat - res: ', this.state.buffer);
       })
     })
   }
@@ -101,14 +116,13 @@ class App extends Component {
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>Your Image</h1>
-              <p>This image is stored on IPFS & The Ethereum Blockchain!</p>
-              <img src={`https://ipfs.io/ipfs/${this.state.ipfsHash}`} alt=""/>
-              <h2>Upload Image</h2>
+              <h2>Upload Image to IPFS</h2>
               <form onSubmit={this.onSubmit} >
                 <input type='file' onChange={this.captureFile} />
                 <input type='submit' />
               </form>
+              <h2>Image loaded from IPFS</h2>
+              <img alt="feesimple" src={this.state.buffer} height="70" width="70"/>
             </div>
           </div>
         </main>
